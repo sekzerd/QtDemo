@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.5)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(PROJECT_NAME "QtDemo")
+project(${PROJECT_NAME} VERSION 0.1 LANGUAGES CXX)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+set(PROJECT_SOURCES
+  main.cpp
+  MainWindow.cpp
+  MainWindow.hpp
+  MainWindow.ui
+)
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+  qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+  )
+else()
+  add_executable(LoveLin ${PROJECT_SOURCES})
+endif()
+target_link_libraries(LoveLin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+if(WIN32)
+  #setup target directory
+  set(QT_INSTALL_PATH "${CMAKE_PREFIX_PATH}")
+  set(TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+  set(REQUIRED_LIBS Core Widgets Gui)
+  set(PLUGINS_LIBS qdirect2d qminimal qoffscreen qwindows)
+  set(DEBUG_SUFFIX "")
+
+  if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(DEBUG_SUFFIX "d")
+  endif()
+
+  #copy Qt dll files
+  foreach (QT_LIB ${REQUIRED_LIBS})
+    file(COPY "${QT_INSTALL_PATH}/bin/Qt${QT_VERSION_MAJOR}${QT_LIB}${DEBUG_SUFFIX}.dll" DESTINATION "${TARGET_DIR}")
+  endforeach()
+
+  #copy platforms files
+  foreach(LIB ${PLUGINS_LIBS})
+    file(COPY "${QT_INSTALL_PATH}/plugins/platforms/${LIB}${DEBUG_SUFFIX}.dll" DESTINATION "${TARGET_DIR}/platforms")
+  endforeach()
+endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+  MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+  MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+  MACOSX_BUNDLE TRUE
+  WIN32_EXECUTABLE TRUE
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+  qt_finalize_executable(${PROJECT_NAME})
+endif()
+
+
