@@ -30,9 +30,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     ${PROJECT_SOURCES}
   )
 else()
-  add_executable(LoveLin ${PROJECT_SOURCES})
+  add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 endif()
-target_link_libraries(LoveLin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 if(WIN32)
   #setup target directory
